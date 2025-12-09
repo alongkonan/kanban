@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบจัดการการบ้าน</title>
+  <script src="https://bw7xykw37whntsmt.canvacode.com/_sdk/data_sdk.js"></script>
+  <script src="https://bw7xykw37whntsmt.canvacode.com/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap');
+    
+    .priority-high { border-left: 4px solid #ef4444; }
+    .priority-medium { border-left: 4px solid #f59e0b; }
+    .priority-low { border-left: 4px solid #10b981; }
+    
+    .status-completed { opacity: 0.6; text-decoration: line-through; }
+    
+    .calendar-day {
+      min-height: 80px;
+      transition: all 0.2s;
+    }
+    
+    .calendar-day:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .homework-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin: 2px;
+    }
+    
+    .modal-overlay {
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(2px);
+    }
+    
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+    }
+    
+    .tab-active {
+      border-bottom: 3px solid #3b82f6;
+      color: #3b82f6;
+      font-weight: 600;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full bg-gradient-to-br from-blue-50 to-indigo-100 overflow-auto"><!-- Header -->
+   <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+     <div class="flex items-center justify-between">
+      <h1 id="app-title" class="text-2xl sm:text-3xl font-bold text-indigo-700">📚 ระบบจัดการการบ้าน</h1>
+     </div>
+    </div>
+   </header>
+   <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8"><!-- LINE Setup Instructions -->
+    <div id="line-setup-banner" class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-6 mb-6 rounded-lg shadow-md">
+     <div class="flex items-start gap-4">
+      <div class="text-4xl">
+       📱
+      </div>
+      <div class="flex-1">
+       <h3 class="font-bold text-blue-800 mb-2 text-lg">วิธีการเชื่อมต่อ LINE</h3>
+       <ol class="text-sm text-blue-700 space-y-2 mb-4 list-decimal list-inside">
+        <li><strong>Add Friend:</strong> สแกน QR Code หรือคลิกลิงก์ด้านล่างเพื่อเพิ่ม LINE Bot เป็นเพื่อน</li>
+        <li><strong>รับ User ID:</strong> หลังจาก Add เป็นเพื่อนแล้ว Bot จะส่งข้อความพร้อม User ID ของคุณ (หรือพิมพ์ "ID" ใน Chat)</li>
+        <li><strong>ใส่ User ID:</strong> นำ User ID มาใส่ในช่องด้านล่าง แล้วคลิก "เชื่อมต่อ"</li>
+       </ol>
+       <div class="bg-white p-4 rounded-lg mb-4">
+        <p class="text-sm font-semibold text-gray-700 mb-2">🔗 เพิ่มเพื่อน LINE Bot:</p><a href="https://line.me/R/ti/p/@973yoxkr" target="_blank" rel="noopener noreferrer" class="inline-block bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200"> <span class="flex items-center gap-2">
+          <svg width="20" height="20" viewbox="0 0 24 24" fill="white"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+          </svg> เพิ่มเพื่อน LINE Bot </span> </a>
+        <p class="text-xs text-gray-500 mt-2">💡 หลัง Add เป็นเพื่อน Bot จะส่ง User ID ให้คุณทันที หรือพิมพ์ "ID" เพื่อขอ User ID</p>
+       </div>
+       <div class="bg-white p-4 rounded-lg"><label for="user-id-input" class="block text-sm font-semibold text-gray-700 mb-2"> ใส่ LINE User ID ของคุณ: </label>
+        <div class="flex gap-2"><input type="text" id="user-id-input" placeholder="ตัวอย่าง: U1234567890abcdef1234567890abcdef" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"> <button id="connect-line-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-200 whitespace-nowrap"> เชื่อมต่อ </button>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">🔒 ข้อมูลของคุณจะถูกเก็บไว้อย่างปลอดภัย</p>
+       </div>
+      </div>
+     </div>
+    </div><!-- LINE Connected Banner -->
+    <div id="line-connected-banner" class="hidden bg-gradient-to-r from-green-50 to-green-100 border-l-4 border-green-500 p-4 mb-6 rounded-lg shadow-md">
+     <div class="flex items-start gap-3">
+      <div class="text-3xl">
+       ✅
+      </div>
+      <div class="flex-1">
+       <h3 class="font-bold text-green-800 mb-1">เ���������่อ���ต่อ LINE สำเร็จ!</h3>
+       <p class="text-sm text-green-700 mb-1">User ID: <code id="connected-user-id" class="bg-green-200 px-2 py-1 rounded"></code></p>
+       <p class="text-sm text-green-700 mb-3">คุณจะไ��้รับการแจ้งเตือนการบ้านที่��������ล้ครบกำหนดทุกวันเวลา 17:00 น.</p>
+       <div class="flex gap-2 flex-wrap"><button id="test-notification-btn" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200"> 🧪 ทดสอบส่งการแจ้งเตือน </button> <button id="disconnect-line-btn" class="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-200"> ❌ ยกเลิกการเชื่อมต่อ </button>
+       </div>
+      </div>
+     </div>
+    </div><!-- Dashboard Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+     <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-indigo-500">
+      <div class="flex items-center justify-between">
+       <div>
+        <p id="total-label" class="text-gray-600 text-sm">งานทั้งหมด</p>
+        <p id="total-count" class="text-3xl font-bold text-indigo-700">0</p>
+       </div>
+       <div class="text-4xl">
+        📝
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-green-500">
+      <div class="flex items-center justify-between">
+       <div>
+        <p id="completed-label" class="text-gray-600 text-sm">ทำแล้ว</p>
+        <p id="completed-count" class="text-3xl font-bold text-green-600">0</p>
+       </div>
+       <div class="text-4xl">
+        ✅
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-lg shadow-md p-4 border-l-4 border-orange-500">
+      <div class="flex items-center justify-between">
+       <div>
+        <p id="pending-label" class="text-gray-600 text-sm">ยังไม่ทำ</p>
+        <p id="pending-count" class="text-3xl font-bold text-orange-600">0</p>
+       </div>
+       <div class="text-4xl">
+        ⏰
+       </div>
+      </div>
+     </div>
+    </div><!-- Add Homework Button -->
+    <div class="mb-6"><button id="add-homework-btn" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition duration-200 flex items-center justify-center gap-2"> <span class="text-xl">➕</span> <span>เพิ่มการบ้านใหม่</span> </button>
+    </div><!-- Tabs -->
+    <div class="bg-white rounded-t-lg shadow-md">
+     <div class="flex border-b"><button id="tab-list" class="flex-1 py-3 px-4 text-center tab-active transition duration-200"> 📋 รายการ </button> <button id="tab-calendar" class="flex-1 py-3 px-4 text-center text-gray-600 hover:bg-gray-50 transition duration-200"> 📅 ปฏิทิน </button>
+     </div>
+    </div><!-- List View -->
+    <div id="list-view" class="bg-white rounded-b-lg shadow-md p-4 sm:p-6">
+     <div id="homework-list" class="space-y-4"><!-- Homework items will be inserted here -->
+     </div>
+     <div id="empty-state" class="text-center py-12 text-gray-400">
+      <div class="text-6xl mb-4">
+       📚
+      </div>
+      <p class="text-lg">ยังไม่มีการบ้าน</p>
+      <p class="text-sm">คลิกปุ่มด้านบนเพื่อเพิ่มการบ้านใหม่</p>
+     </div>
+    </div><!-- Calendar View -->
+    <div id="calendar-view" class="bg-white rounded-b-lg shadow-md p-4 sm:p-6 hidden">
+     <div class="flex items-center justify-between mb-4"><button id="prev-month" class="p-2 hover:bg-gray-100 rounded-lg transition duration-200"> ◀️ เดือนก่อน </button>
+      <h2 id="current-month" class="text-xl font-bold text-gray-800"></h2><button id="next-month" class="p-2 hover:bg-gray-100 rounded-lg transition duration-200"> เดือนถัดไป ▶️ </button>
+     </div>
+     <div id="calendar-grid" class="grid grid-cols-7 gap-1"><!-- Calendar will be inserted here -->
+     </div>
+    </div>
+   </div><!-- Add/Edit Modal -->
+   <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-overlay">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl mx-4 max-h-[90%] overflow-y-auto">
+     <div class="bg-indigo-600 text-white px-6 py-4 rounded-t-lg">
+      <h2 id="modal-title" class="text-2xl font-bold">เพิ่มการบ้านใหม่</h2>
+     </div>
+     <form id="homework-form" class="p-6 space-y-4">
+      <div><label for="subject" class="block text-sm font-semibold text-gray-700 mb-1">วิชา *</label> <input type="text" id="subject" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="เช่น คณิตศาสตร์">
+      </div>
+      <div><label for="title" class="block text-sm font-semibold text-gray-700 mb-1">ชื่องาน *</label> <input type="text" id="title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="เช่น แบบฝึกหัดบทที่ 3">
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+       <div><label for="assigned-date" class="block text-sm font-semibold text-gray-700 mb-1">วันที่ได้รับ *</label> <input type="date" id="assigned-date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+       </div>
+       <div><label for="due-date" class="block text-sm font-semibold text-gray-700 mb-1">วันครบกำหนด *</label> <input type="date" id="due-date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+       </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+       <div><label for="difficulty" class="block text-sm font-semibold text-gray-700 mb-1">ความยาก *</label> <select id="difficulty" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"> <option value="">เลือก</option> <option value="1">ต่ำ (1)</option> <option value="2">กลาง (2)</option> <option value="3">สูง (3)</option> </select>
+       </div>
+       <div><label for="importance" class="block text-sm font-semibold text-gray-700 mb-1">ความสำคัญ *</label> <select id="importance" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"> <option value="">เลือก</option> <option value="1">ต่ำ (1)</option> <option value="2">กลาง (2)</option> <option value="3">สูง (3)</option> </select>
+       </div>
+      </div>
+      <div><label for="status" class="block text-sm font-semibold text-gray-700 mb-1">สถานะ *</label> <select id="status" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"> <option value="pending">ยังไม่ทำ</option> <option value="completed">ทำแล้ว</option> </select>
+      </div>
+      <div class="flex gap-3 pt-4"><button type="submit" id="submit-btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200"> บันทึก </button> <button type="button" id="cancel-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg transition duration-200"> ยกเลิก </button>
+      </div>
+     </form>
+    </div>
+   </div><!-- Toast Notification -->
+   <div id="toast" class="fixed bottom-6 right-6 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg hidden transform transition-all duration-300">
+    <p id="toast-message"></p>
+   </div>
+  </div>
+  <script>
+    // Configuration
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDIVkDm8Vm1cnQIbx1hxKgd4GJHHE4Wl7gIRV7RqVZJPcw-1cg0yBHw1h2sPidMuKS/exec';
+    
+    const defaultConfig = {
+      app_title: '📚 ระบบจัดการการบ้าน',
+      total_label: 'งานทั้งหมด',
+      completed_label: 'ทำแล้ว',
+      pending_label: 'ยังไม่ทำ'
+    };
+
+    let homeworkData = [];
+    let editingHomework = null;
+    let currentMonth = new Date();
+    let lineUserId = null;
+
+    const dataHandler = {
+      onDataChanged(data) {
+        homeworkData = data;
+        updateDashboard();
+        if (document.getElementById('list-view').classList.contains('hidden')) {
+          renderCalendar();
+        } else {
+          renderHomeworkList();
+        }
+        
+        // อัปเดตข้อมูลการบ้านไปยัง Backend (สำหรับการแจ้งเตือนอัตโนมัติ)
+        if (lineUserId) {
+          syncHomeworkToBackend();
+        }
+      }
+    };
+
+    async function onConfigChange(config) {
+      document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('total-label').textContent = config.total_label || defaultConfig.total_label;
+      document.getElementById('completed-label').textContent = config.completed_label || defaultConfig.completed_label;
+      document.getElementById('pending-label').textContent = config.pending_label || defaultConfig.pending_label;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ['app_title', config.app_title || defaultConfig.app_title],
+        ['total_label', config.total_label || defaultConfig.total_label],
+        ['completed_label', config.completed_label || defaultConfig.completed_label],
+        ['pending_label', config.pending_label || defaultConfig.pending_label]
+      ]);
+    }
+
+    async function init() {
+      if (window.elementSdk) {
+        await window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Failed to initialize data SDK');
+        }
+      }
+
+      setupEventListeners();
+      setTodayAsDefault();
+      loadLineSession();
+    }
+
+    function setupEventListeners() {
+      document.getElementById('add-homework-btn').addEventListener('click', openAddModal);
+      document.getElementById('cancel-btn').addEventListener('click', closeModal);
+      document.getElementById('homework-form').addEventListener('submit', handleFormSubmit);
+      document.getElementById('tab-list').addEventListener('click', () => switchTab('list'));
+      document.getElementById('tab-calendar').addEventListener('click', () => switchTab('calendar'));
+      document.getElementById('prev-month').addEventListener('click', () => changeMonth(-1));
+      document.getElementById('next-month').addEventListener('click', () => changeMonth(1));
+      document.getElementById('connect-line-btn').addEventListener('click', handleConnectLine);
+      document.getElementById('disconnect-line-btn').addEventListener('click', handleDisconnectLine);
+      document.getElementById('test-notification-btn').addEventListener('click', sendTestNotification);
+      
+      document.getElementById('modal').addEventListener('click', (e) => {
+        if (e.target.id === 'modal') closeModal();
+      });
+    }
+
+    // ===== LINE Connection Functions =====
+    
+    function handleConnectLine() {
+      const userIdInput = document.getElementById('user-id-input');
+      const userId = userIdInput.value.trim();
+      
+      if (!userId) {
+        showToast('กรุณาใส่ LINE User ID', 'error');
+        return;
+      }
+      
+      if (!userId.startsWith('U') || userId.length !== 33) {
+        showToast('รูปแบบ User ID ไม่ถูกต้อง (ต้องขึ้นต้นด้วย U และยาว 33 ตัวอักษร)', 'error');
+        return;
+      }
+      
+      lineUserId = userId;
+      localStorage.setItem('line_user_id', lineUserId);
+      
+      updateUIAfterConnection();
+      syncHomeworkToBackend();
+      showToast('เชื่อมต่อ LINE สำเร็จ!', 'success');
+    }
+
+    function updateUIAfterConnection() {
+      document.getElementById('line-setup-banner').classList.add('hidden');
+      document.getElementById('line-connected-banner').classList.remove('hidden');
+      document.getElementById('connected-user-id').textContent = lineUserId;
+    }
+
+    function handleDisconnectLine() {
+      if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกการเชื่อมต่อ LINE?')) {
+        return;
+      }
+      
+      lineUserId = null;
+      localStorage.removeItem('line_user_id');
+      
+      document.getElementById('line-setup-banner').classList.remove('hidden');
+      document.getElementById('line-connected-banner').classList.add('hidden');
+      document.getElementById('user-id-input').value = '';
+      
+      showToast('ยกเลิกการเชื่อมต่อแล้ว', 'info');
+    }
+
+    function loadLineSession() {
+      const savedUserId = localStorage.getItem('line_user_id');
+      
+      if (savedUserId) {
+        lineUserId = savedUserId;
+        updateUIAfterConnection();
+      }
+    }
+
+    async function syncHomeworkToBackend() {
+      if (!lineUserId || homeworkData.length === 0) return;
+      
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const upcomingHomework = homeworkData
+          .filter(h => h.status !== 'completed')
+          .map(h => {
+            const daysLeft = getDaysLeft(h.dueDate);
+            return {
+              subject: h.subject,
+              title: h.title,
+              dueDate: new Date(h.dueDate).toLocaleDateString('th-TH'),
+              daysLeft: daysLeft,
+              priorityScore: calculatePriorityScore(h),
+              status: h.status
+            };
+          });
+        
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'updateHomework',
+            userId: lineUserId,
+            homeworkList: upcomingHomework
+          })
+        });
+        
+      } catch (error) {
+        console.error('Error syncing homework:', error);
+      }
+    }
+
+    async function sendTestNotification() {
+      if (!lineUserId) {
+        showToast('กรุณาเชื่อมต่อ LINE ก่อน', 'error');
+        return;
+      }
+      
+      const btn = document.getElementById('test-notification-btn');
+      btn.disabled = true;
+      btn.textContent = 'กำลังส่ง...';
+      
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const upcomingHomework = homeworkData
+          .filter(h => {
+            const daysLeft = getDaysLeft(h.dueDate);
+            return daysLeft >= 0 && daysLeft <= 5 && h.status !== 'completed';
+          })
+          .slice(0, 5)
+          .map(h => ({
+            subject: h.subject,
+            title: h.title,
+            dueDate: new Date(h.dueDate).toLocaleDateString('th-TH'),
+            daysLeft: getDaysLeft(h.dueDate),
+            priorityScore: calculatePriorityScore(h),
+            status: h.status
+          }));
+        
+        if (upcomingHomework.length === 0) {
+          showToast('ไม่มีการบ้านที่ใกล้ครบกำหนด (≤ 5 วัน)', 'info');
+          btn.disabled = false;
+          btn.textContent = '🧪 ทดสอบส่งการแจ้งเตือน';
+          return;
+        }
+        
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'sendNotification',
+            userId: lineUserId,
+            homeworkList: upcomingHomework
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showToast('ส่งการแจ้งเตือนสำเร็จ! ตรวจสอบ LINE', 'success');
+        } else {
+          showToast('ไม่สามารถส่งการแจ้งเตือนได้: ' + result.message, 'error');
+        }
+        
+      } catch (error) {
+        console.error('Error sending notification:', error);
+        showToast('เกิดข้อผิดพลาดในการส่งการแจ้งเตือน', 'error');
+      }
+      
+      btn.disabled = false;
+      btn.textContent = '🧪 ทดสอบส่งการแจ้งเตือน';
+    }
+
+    // ===== Toast Notification =====
+    
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      
+      toastMessage.textContent = message;
+      
+      toast.classList.remove('bg-gray-800', 'bg-green-600', 'bg-red-600', 'bg-blue-600');
+      
+      if (type === 'success') {
+        toast.classList.add('bg-green-600');
+      } else if (type === 'error') {
+        toast.classList.add('bg-red-600');
+      } else if (type === 'info') {
+        toast.classList.add('bg-blue-600');
+      } else {
+        toast.classList.add('bg-gray-800');
+      }
+      
+      toast.classList.remove('hidden');
+      
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    // ===== Homework Management Functions =====
+
+    function setTodayAsDefault() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('assigned-date').value = today;
+      document.getElementById('due-date').value = today;
+    }
+
+    function openAddModal() {
+      editingHomework = null;
+      document.getElementById('modal-title').textContent = 'เพิ่มการบ้านใหม่';
+      document.getElementById('homework-form').reset();
+      setTodayAsDefault();
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    function openEditModal(homework) {
+      editingHomework = homework;
+      document.getElementById('modal-title').textContent = 'แก้ไขการบ้าน';
+      document.getElementById('subject').value = homework.subject;
+      document.getElementById('title').value = homework.title;
+      document.getElementById('assigned-date').value = homework.assignedDate;
+      document.getElementById('due-date').value = homework.dueDate;
+      document.getElementById('difficulty').value = homework.difficulty;
+      document.getElementById('importance').value = homework.importance;
+      document.getElementById('status').value = homework.status;
+      document.getElementById('modal').classList.remove('hidden');
+      document.getElementById('modal').classList.add('flex');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+      document.getElementById('modal').classList.remove('flex');
+      editingHomework = null;
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'กำลังบันทึก...';
+
+      const homeworkItem = {
+        subject: document.getElementById('subject').value,
+        title: document.getElementById('title').value,
+        assignedDate: document.getElementById('assigned-date').value,
+        dueDate: document.getElementById('due-date').value,
+        difficulty: document.getElementById('difficulty').value,
+        importance: document.getElementById('importance').value,
+        status: document.getElementById('status').value,
+        createdAt: new Date().toISOString()
+      };
+
+      let result;
+      if (editingHomework) {
+        result = await window.dataSdk.update({ ...homeworkItem, __backendId: editingHomework.__backendId });
+      } else {
+        if (homeworkData.length >= 999) {
+          showToast('ถึงจำนวนสูงสุด 999 รายการแล้ว กรุณาลบรายการเก่าก่อน', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'บันทึก';
+          return;
+        }
+        result = await window.dataSdk.create(homeworkItem);
+      }
+
+      if (result.isOk) {
+        closeModal();
+        showToast('บันทึกสำเร็จ!', 'success');
+      } else {
+        showToast('เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'บันทึก';
+    }
+
+    function calculatePriorityScore(homework) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(homework.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+      
+      const daysScore = 10 - daysLeft;
+      const difficultyScore = parseInt(homework.difficulty);
+      const importanceScore = parseInt(homework.importance);
+      
+      return daysScore + difficultyScore + importanceScore;
+    }
+
+    function getDaysLeft(dueDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const due = new Date(dueDate);
+      due.setHours(0, 0, 0, 0);
+      return Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    }
+
+    function getUrgencyClass(daysLeft) {
+      if (daysLeft <= 2) return 'priority-high';
+      if (daysLeft <= 5) return 'priority-medium';
+      return 'priority-low';
+    }
+
+    function getUrgencyColor(daysLeft) {
+      if (daysLeft <= 2) return '#ef4444';
+      if (daysLeft <= 5) return '#f59e0b';
+      return '#10b981';
+    }
+
+    function getDifficultyText(level) {
+      const map = { '1': 'ต่ำ', '2': 'กลาง', '3': 'สูง' };
+      return map[level] || level;
+    }
+
+    function getImportanceText(level) {
+      const map = { '1': 'ต่ำ', '2': 'กลาง', '3': 'สูง' };
+      return map[level] || level;
+    }
+
+    function updateDashboard() {
+      const total = homeworkData.length;
+      const completed = homeworkData.filter(h => h.status === 'completed').length;
+      const pending = total - completed;
+      
+      document.getElementById('total-count').textContent = total;
+      document.getElementById('completed-count').textContent = completed;
+      document.getElementById('pending-count').textContent = pending;
+    }
+
+    function renderHomeworkList() {
+      const listContainer = document.getElementById('homework-list');
+      const emptyState = document.getElementById('empty-state');
+      
+      if (homeworkData.length === 0) {
+        listContainer.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      emptyState.classList.add('hidden');
+      
+      const sortedHomework = [...homeworkData].sort((a, b) => {
+        return calculatePriorityScore(b) - calculatePriorityScore(a);
+      });
+      
+      listContainer.innerHTML = sortedHomework.map(homework => {
+        const priorityScore = calculatePriorityScore(homework);
+        const daysLeft = getDaysLeft(homework.dueDate);
+        const urgencyClass = getUrgencyClass(daysLeft);
+        const statusClass = homework.status === 'completed' ? 'status-completed' : '';
+        
+        return `
+          <div class="bg-white border rounded-lg p-4 ${urgencyClass} ${statusClass} hover:shadow-lg transition duration-200">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full">
+                    ${homework.subject}
+                  </span>
+                  <span class="text-xs font-bold text-gray-700">
+                    คะแนน: ${priorityScore}
+                  </span>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-1">${homework.title}</h3>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                  <div>📅 ครบกำหนด: ${new Date(homework.dueDate).toLocaleDateString('th-TH')}</div>
+                  <div>⏰ เหลือ: ${daysLeft} วัน</div>
+                  <div>📊 ความยาก: ${getDifficultyText(homework.difficulty)}</div>
+                  <div>⭐ ความสำคัญ: ${getImportanceText(homework.importance)}</div>
+                </div>
+              </div>
+              <div class="flex sm:flex-col gap-2">
+                <button onclick="toggleStatus('${homework.__backendId}')" class="flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition duration-200 ${homework.status === 'completed' ? 'bg-gray-300 hover:bg-gray-400 text-gray-700' : 'bg-green-500 hover:bg-green-600 text-white'}">
+                  ${homework.status === 'completed' ? '↩️ ยังไม่ทำ' : '✅ ทำแล้ว'}
+                </button>
+                <button onclick="editHomework('${homework.__backendId}')" class="flex-1 sm:flex-none px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold transition duration-200">
+                  ✏️ แก้ไข
+                </button>
+                <button onclick="deleteHomework('${homework.__backendId}')" class="flex-1 sm:flex-none px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition duration-200">
+                  🗑️ ลบ
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function toggleStatus(backendId) {
+      const homework = homeworkData.find(h => h.__backendId === backendId);
+      if (!homework) return;
+      
+      const newStatus = homework.status === 'completed' ? 'pending' : 'completed';
+      const result = await window.dataSdk.update({ ...homework, status: newStatus });
+      
+      if (!result.isOk) {
+        showToast('เกิดข้อผิดพลาดในการเปลี่ยนสถานะ', 'error');
+      }
+    }
+
+    function editHomework(backendId) {
+      const homework = homeworkData.find(h => h.__backendId === backendId);
+      if (homework) {
+        openEditModal(homework);
+      }
+    }
+
+    async function deleteHomework(backendId) {
+      const homework = homeworkData.find(h => h.__backendId === backendId);
+      if (!homework) return;
+      
+      const confirmBtn = event.target;
+      if (confirmBtn.textContent === '🗑️ ลบ') {
+        confirmBtn.textContent = '❓ ยืนยัน?';
+        confirmBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+        confirmBtn.classList.add('bg-red-700', 'hover:bg-red-800');
+        
+        setTimeout(() => {
+          confirmBtn.textContent = '🗑️ ลบ';
+          confirmBtn.classList.remove('bg-red-700', 'hover:bg-red-800');
+          confirmBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+        }, 3000);
+        return;
+      }
+      
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'กำลังลบ...';
+      
+      const result = await window.dataSdk.delete(homework);
+      
+      if (!result.isOk) {
+        showToast('เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = '🗑️ ลบ';
+      } else {
+        showToast('ลบสำเร็จ!', 'success');
+      }
+    }
+
+    function switchTab(tab) {
+      const listTab = document.getElementById('tab-list');
+      const calendarTab = document.getElementById('tab-calendar');
+      const listView = document.getElementById('list-view');
+      const calendarView = document.getElementById('calendar-view');
+      
+      if (tab === 'list') {
+        listTab.classList.add('tab-active');
+        calendarTab.classList.remove('tab-active');
+        listView.classList.remove('hidden');
+        calendarView.classList.add('hidden');
+        renderHomeworkList();
+      } else {
+        calendarTab.classList.add('tab-active');
+        listTab.classList.remove('tab-active');
+        calendarView.classList.remove('hidden');
+        listView.classList.add('hidden');
+        renderCalendar();
+      }
+    }
+
+    function changeMonth(delta) {
+      currentMonth.setMonth(currentMonth.getMonth() + delta);
+      renderCalendar();
+    }
+
+    function renderCalendar() {
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+      
+      document.getElementById('current-month').textContent = 
+        new Date(year, month).toLocaleDateString('th-TH', { year: 'numeric', month: 'long' });
+      
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      const calendarGrid = document.getElementById('calendar-grid');
+      calendarGrid.innerHTML = '';
+      
+      const dayNames = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
+      dayNames.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'text-center font-bold text-gray-700 py-2 bg-indigo-100';
+        dayHeader.textContent = day;
+        calendarGrid.appendChild(dayHeader);
+      });
+      
+      for (let i = 0; i < firstDay; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day border border-gray-200 bg-gray-50';
+        calendarGrid.appendChild(emptyCell);
+      }
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const homeworkOnDate = homeworkData.filter(h => h.dueDate === dateStr);
+        
+        const dayCell = document.createElement('div');
+        dayCell.className = 'calendar-day border border-gray-200 bg-white p-2';
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const cellDate = new Date(year, month, day);
+        
+        if (cellDate.toDateString() === today.toDateString()) {
+          dayCell.classList.add('bg-indigo-50', 'border-indigo-400');
+        }
+        
+        dayCell.innerHTML = `
+          <div class="font-bold text-gray-700 mb-1">${day}</div>
+          <div class="flex flex-wrap gap-1">
+            ${homeworkOnDate.map(h => {
+              const daysLeft = getDaysLeft(h.dueDate);
+              const color = getUrgencyColor(daysLeft);
+              return `<div class="homework-dot" style="background-color: ${color}" title="${h.subject}: ${h.title}"></div>`;
+            }).join('')}
+          </div>
+        `;
+        
+        calendarGrid.appendChild(dayCell);
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ab4d0c5c280894f',t:'MTc2NTI4NjU5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
