@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Kanban - บันทึกการบ้าน</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📚 Homework Kanban</h1>
+                <div class="header-actions">
+                    <button id="loginBtn" class="btn btn-primary">เข้าสู่ระบบ LINE</button>
+                    <div id="userInfo" class="user-info hidden">
+                        <span id="userName"></span>
+                        <button id="logoutBtn" class="btn btn-secondary btn-sm">ออกจากระบบ</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="appContent" class="app-content hidden">
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar">
+                <nav class="nav">
+                    <button class="nav-item active" data-view="dashboard">
+                        <span class="icon">📊</span>
+                        <span>Dashboard</span>
+                    </button>
+                    <button class="nav-item" data-view="homework">
+                        <span class="icon">📋</span>
+                        <span>งานทั้งหมด</span>
+                    </button>
+                    <button class="nav-item" data-view="calendar">
+                        <span class="icon">📅</span>
+                        <span>ปฏิทิน</span>
+                    </button>
+                    <button class="nav-item" data-view="add">
+                        <span class="icon">➕</span>
+                        <span>เพิ่มงาน</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Dashboard View -->
+                <section id="dashboardView" class="view active">
+                    <div class="view-header">
+                        <h2>Dashboard</h2>
+                        <button id="sendReminderBtn" class="btn btn-secondary btn-sm">📢 ส่งเตือน</button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalHw">0</div>
+                            <div class="stat-label">งานทั้งหมด</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value completed" id="completedHw">0</div>
+                            <div class="stat-label">✅ ทำแล้ว</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value incomplete" id="incompleteHw">0</div>
+                            <div class="stat-label">❌ ยังไม่ทำ</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="completionRate">0%</div>
+                            <div class="stat-label">อัตราสำเร็จ</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <h3>ความก้าวหน้า</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                    <div class="upcoming-section">
+                        <h3>⏰ งานที่ครบกำหนดใกล้จะถึง</h3>
+                        <div id="upcomingList" class="upcoming-list"></div>
+                    </div>
+                </section>
+
+                <!-- Homework View -->
+                <section id="homeworkView" class="view">
+                    <div class="view-header">
+                        <h2>งานทั้งหมด</h2>
+                        <div class="filter-group">
+                            <select id="statusFilter" class="filter-select">
+                                <option value="">ทั้งหมด</option>
+                                <option value="incomplete">ยังไม่ทำ</option>
+                                <option value="complete">ทำแล้ว</option>
+                            </select>
+                            <select id="difficultyFilter" class="filter-select">
+                                <option value="">ทั้งหมด</option>
+                                <option value="low">ต่ำ</option>
+                                <option value="medium">กลาง</option>
+                                <option value="high">สูง</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="homeworkTable" class="homework-table">
+                            <thead>
+                                <tr>
+                                    <th>วิชา</th>
+                                    <th>ชื่องาน</th>
+                                    <th>ครบกำหนด</th>
+                                    <th>เหลือวัน</th>
+                                    <th>ยาก</th>
+                                    <th>สำคัญ</th>
+                                    <th>Priority</th>
+                                    <th>สถานะ</th>
+                                    <th>การกระทำ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="homeworkTbody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Calendar View -->
+                <section id="calendarView" class="view">
+                    <div class="view-header">
+                        <h2>ปฏิทิน</h2>
+                        <div class="calendar-nav">
+                            <button id="prevMonth" class="btn btn-sm">← ก่อนหน้า</button>
+                            <span id="currentMonth" class="calendar-month"></span>
+                            <button id="nextMonth" class="btn btn-sm">ถัดไป →</button>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-container">
+                        <div class="calendar-weekdays">
+                            <div>อา</div>
+                            <div>จ</div>
+                            <div>อ</div>
+                            <div>พ</div>
+                            <div>พฤ</div>
+                            <div>ศ</div>
+                            <div>ส</div>
+                        </div>
+                        <div id="calendarDays" class="calendar-days"></div>
+                    </div>
+
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <span class="legend-color critical"></span> ≤2 วัน
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color warning"></span> 3-5 วัน
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color normal"></span> >5 วัน
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Add Homework View -->
+                <section id="addView" class="view">
+                    <h2>เพิ่มงานใหม่</h2>
+                    
+                    <form id="addHomeworkForm" class="form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="subject">วิชา *</label>
+                                <input type="text" id="subject" name="subject" required placeholder="เช่น คณิตศาสตร์">
+                            </div>
+                            <div class="form-group">
+                                <label for="taskName">ชื่องาน *</label>
+                                <input type="text" id="taskName" name="taskName" required placeholder="เช่น ทำแบบฝึกหัด">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="receivedDate">วันที่ได้รับ</label>
+                                <input type="date" id="receivedDate" name="receivedDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="dueDate">วันครบกำหนด *</label>
+                                <input type="date" id="dueDate" name="dueDate" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="difficulty">ความยาก</label>
+                                <select id="difficulty" name="difficulty">
+                                    <option value="low">ต่ำ</option>
+                                    <option value="medium" selected>กลาง</option>
+                                    <option value="high">สูง</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="importance">ความสำคัญ</label>
+                                <select id="importance" name="importance">
+                                    <option value="low">ต่ำ</option>
+                                    <option value="medium" selected>กลาง</option>
+                                    <option value="high">สูง</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">บันทึกงาน</button>
+                            <button type="reset" class="btn btn-secondary btn-large">ล้าง</button>
+                        </div>
+                    </form>
+                </section>
+            </main>
+        </div>
+
+        <!-- Loading & Auth Screen -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1>📚 Homework Kanban</h1>
+                    <p>บันทึกและติดตามการบ้านของคุณ</p>
+                </div>
+                <div class="login-content">
+                    <p>เข้าสู่ระบบด้วย LINE เพื่อใช้งาน</p>
+                    <button id="mainLoginBtn" class="btn btn-primary btn-large">
+                        🔗 เข้าสู่ระบบด้วย LINE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing homework -->
+    <div id="editModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>แก้ไขงาน</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="editForm" class="form">
+                <div class="form-group">
+                    <label for="editSubject">วิชา</label>
+                    <input type="text" id="editSubject" required>
+                </div>
+                <div class="form-group">
+                    <label for="editTaskName">ชื่องาน</label>
+                    <input type="text" id="editTaskName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">สถานะ</label>
+                    <select id="editStatus">
+                        <option value="incomplete">ยังไม่ทำ</option>
+                        <option value="complete">ทำแล้ว</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">บันทึก</button>
+                    <button type="button" class="btn btn-secondary" data-action="cancel">ยกเลิก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

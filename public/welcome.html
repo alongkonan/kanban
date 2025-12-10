@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework Kanban - บันทึกการบ้าน</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .welcome-container {
+            background: white;
+            padding: 60px 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-container h1 {
+            font-size: 48px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .welcome-container h2 {
+            font-size: 32px;
+            color: #32325d;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .welcome-container p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .features {
+            text-align: left;
+            margin: 40px 0;
+            padding: 30px;
+            background: #f7f8fc;
+            border-radius: 12px;
+        }
+
+        .features h3 {
+            color: #32325d;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .features ul {
+            list-style: none;
+        }
+
+        .features li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 15px;
+        }
+
+        .features li:before {
+            content: "✓ ";
+            color: #2dce89;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 32px;
+            margin-top: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .stat {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 8px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+            text-transform: uppercase;
+        }
+
+        .redirect-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: #fff9e6;
+            border-left: 4px solid #fb6340;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .redirect-info strong {
+            display: block;
+            color: #fb6340;
+            margin-bottom: 8px;
+        }
+
+        .loading {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #667eea;
+        }
+
+        .loading span {
+            display: inline-block;
+            animation: bounce 1.4s infinite;
+        }
+
+        .loading span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <h1>📚 Homework Kanban</h1>
+        <h2>บันทึกการบ้าน</h2>
+        
+        <p>ยินดีต้อนรับสู่ Homework Kanban</p>
+        <p>แอปพลิเคชันเว็บสำหรับจัดการและติดตามการบ้าน</p>
+
+        <div class="features">
+            <h3>✨ ฟีเจอร์หลัก</h3>
+            <ul>
+                <li>เพิ่มและจัดการการบ้านแต่ละวิชา</li>
+                <li>คำนวณ Priority Score อัตโนมัติ</li>
+                <li>จัดเรียงงานตามความสำคัญ</li>
+                <li>มุมมองปฏิทินแสดงวันครบกำหนด</li>
+                <li>ระบบสีแสดงความเร่งด่วน</li>
+                <li>Dashboard แสดงสถิติ</li>
+                <li>แจ้งเตือนผ่าน LINE OA</li>
+                <li>รองรับทุกอุปกรณ์ (Responsive)</li>
+            </ul>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">งาน</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">ใช้งาน</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">📱</div>
+                <div class="stat-label">Mobile</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">🔔</div>
+                <div class="stat-label">Alert</div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="window.location.href='/index.html'">
+            🚀 เริ่มใช้งาน
+        </button>
+
+        <div class="redirect-info">
+            <strong>💡 เคล็ดลับ:</strong>
+            <p>อ่านไฟล์ GETTING_STARTED.md หรือ USER_GUIDE_TH.md เพื่อเรียนรู้การใช้งานเบื้องต้น</p>
+        </div>
+
+        <div class="loading">
+            <span>.</span><span>.</span><span>.</span>
+            <p style="margin-top: 10px; font-size: 12px; color: #999;">แอปพลิเคชันพร้อมใช้งาน</p>
+        </div>
+    </div>
+
+    <script>
+        // Redirect after 3 seconds
+        // Uncomment to auto-redirect:
+        // setTimeout(() => window.location.href = '/index.html', 3000);
+    </script>
+</body>
+</html>

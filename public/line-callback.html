@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>LINE Login - Homework Kanban</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .callback-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .callback-container h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="callback-container">
+        <h1>📚 Homework Kanban</h1>
+        <p>กำลังเข้าสู่ระบบผ่าน LINE...</p>
+        <div class="loading"></div>
+        <div class="status">
+            <p>โปรดรอสักครู่</p>
+        </div>
+    </div>
+
+    <script>
+        // Get authorization code from URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const state = params.get('state');
+
+        if (!code) {
+            document.querySelector('.status').innerHTML = '<p style="color: #f5365c;">เกิดข้อผิดพลาดในการเข้าสู่ระบบ</p>';
+        } else {
+            // Exchange code for access token and get user info
+            fetch('/api/auth/line/callback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, state })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    document.querySelector('.status').innerHTML = '<p style="color: #2dce89;">เข้าสู่ระบบสำเร็จ ✓<br>กำลังเปลี่ยนหน้า...</p>';
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                } else {
+                    document.querySelector('.status').innerHTML = '<p style="color: #f5365c;">เกิดข้อผิดพลาด: ' + data.error + '</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.querySelector('.status').innerHTML = '<p style="color: #f5365c;">เกิดข้อผิดพลาดในการเชื่อมต่อ</p>';
+            });
+        }
+    </script>
+</body>
+</html>
